@@ -1,7 +1,7 @@
 ::  Messenger effects and contact projection. Only this module knows which
 ::  public Gall marks a DM, channel post, or invitation needs.
 /-  t=harness-tlon, dv=tlon-channels-ver, cv=tlon-chat-ver,
-    ct=tlon-contacts, a=tlon-activity-ver
+    ct=tlon-contacts, a=tlon-activity-ver, mt=tlon-meta
 /+  story=harness-tlon-story, profile=harness-tlon-profile,
     ht=harness-tools, publication=harness-tlon-publication,
     hist=harness-tlon-history, onboarding=harness-tlon-onboarding,
@@ -25,7 +25,16 @@
 ++  publish
   |=  [wire=wire to=destination:t text=@t sent=@da blob=(unit @t)]
   ^-  card
-  =/  =memo:v9:dv  [(text-to-story:story text) our.bowl sent]
+  (publish-story wire to (text-to-story:story text) sent ~ blob)
+::
+::  +publish-story: post content; channel posts also take metadata
+::
+++  publish-story
+  |=  $:  wire=wire  to=destination:t  content=story:v9:dv  sent=@da
+          meta=(unit data:mt)  blob=(unit @t)
+      ==
+  ^-  card
+  =/  =memo:v9:dv  [content our.bowl sent]
   ?-  -.to
       %dm
     =/  =diff:dm:v7:cv
@@ -37,7 +46,7 @@
     ::  Use the versioned client action: Groups owns host negotiation. Its
     ::  later channel-response confirms the host-assigned post/reply identity.
     =/  action=a-channels:v10:dv
-      ?~  parent.to  [%channel nest.to %post %add [memo [kind.nest.to ~] ~ blob]]
+      ?~  parent.to  [%channel nest.to %post %add [memo [kind.nest.to ~] meta blob]]
       [%channel nest.to %post %reply u.parent.to %add [memo blob]]
     [%pass wire %agent [our.bowl %channels] %poke %channel-action-2 !>(action)]
   ==

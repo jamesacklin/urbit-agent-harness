@@ -8,7 +8,11 @@
     group-tool=harness-tlon-group-tool, policy=harness-tlon-group-policy,
     message=harness-tlon-message-tool
 /+  notes=harness-tlon-notes-tool, inbox=harness-tlon-inbox-tool, club=harness-tlon-club-tool
-/+  hooks=harness-tlon-hook-tool, publishing=harness-tlon-publish-tool
+/+  hooks=harness-tlon-hook-tool, publishing=harness-tlon-publish-tool,
+    activity=harness-tlon-activity-tool, channel=harness-tlon-channel-tool,
+    section=harness-tlon-section-tool, attachment=harness-tlon-attachment,
+    search=harness-tlon-search-tool, invite=harness-tlon-invite-tool,
+    bucket=harness-tlon-bucket-tool
 /+  migration=harness-tlon-notes-migration, paths=harness-tlon-paths
 |_  bowl=bowl:gall
 +*  read-path  ~(. paths [our now]:bowl)
@@ -29,10 +33,19 @@
 ++  metadata
   |=  [args=json old=data:meta]
   ^-  data:meta
-  ?>  |((has:spec args 'title') (has:spec args 'description'))
+  ?>  (lien `(list @t)`~['title' 'description' 'image' 'cover'] |=(key=@t (has:spec args key)))
   =/  title  (string:spec args 'title' title.old 128)
   ?>  !=('' title)
-  old(title title, description (string:spec args 'description' description.old 1.024))
+  ::  Image and cover are a URL or a color, as the app stores them. Empty
+  ::  keeps the current value: models fill unused arguments with ''.
+  =/  kept
+    |=  [key=@t current=@t]
+    =/  value  (string:spec args key current 2.048)
+    ?:(=('' value) current value)
+  :^  title
+    (string:spec args 'description' description.old 1.024)
+    (kept 'image' image.old)
+  (kept 'cover' cover.old)
 ::
 ++  channel-permissions
   |=  args=json
@@ -214,12 +227,19 @@
   ?:  =('resolve_citation' action)  $(args (citation-arguments args))
   ?:  (handles:~(. notes bowl) action)  (run:~(. notes bowl) args wire)
   ?:  =('activity_inbox' action)  [(en:json:html (read:~(. inbox bowl) args)) ~]
+  ?:  (handles:~(. activity bowl) action)  (run:~(. activity bowl) args wire)
+  ?:  (handles:~(. channel bowl) action)  (run:~(. channel bowl) args wire sent)
+  ?:  (handles:~(. section bowl) action)  (run:~(. section bowl) args wire)
+  ?:  (handles:~(. invite bowl) action)  (run:~(. invite bowl) args wire)
+  ?:  (handles:~(. bucket bowl) action)  (run:~(. bucket bowl) args wire)
   ?:  (handles:~(. club bowl) action)  (run:~(. club bowl) args wire sent)
   ?:  (handles:~(. group-tool bowl) action)
     (run:~(. group-tool bowl) args wire)
   ?:  =('get_channel_permissions' action)
     [(en:json:html (channel-permissions args)) ~]
   ?:  =('list_dms' action)  [(en:json:html (dms:~(. conversation bowl) args)) ~]
+  ?:  &(=('search_history' action) !(has:spec args 'ship') !(has:spec args 'channel'))
+    [(en:json:html (run:~(. search bowl) args)) ~]
   ?:  |(=('history' action) =('search_history' action))
     [(en:json:html (history:~(. conversation bowl) args =('search_history' action))) ~]
   ?:  =('get_profile' action)  [(en:json:html (profile args)) ~]
@@ -231,6 +251,11 @@
   ?:  =('list_groups' action)  [(en:json:html (group-directory args)) ~]
   ?:  |(=('get_group' action) =('list_channels' action) =('list_members' action))
     [(en:json:html (group-details args action)) ~]
+  =/  refusal=(unit @t)
+    ?.  |(=('send_dm' action) =('send_channel' action))  ~
+    =/  composed  (compose:attachment args (destination:spec args))
+    ?:(?=(%| -.composed) `p.composed ~)
+  ?^  refusal  [(cat 3 'error: ' u.refusal) ~]
   ::  Mutations build one native card; the adapter observes its receipt.
   =/  =card:agent:gall  (mutation args wire sent action)
   =/  body
@@ -267,10 +292,12 @@
     [%pass wire %agent [our.bowl %channels] %poke %channel-action-2 !>(act)]
   ?:  =('update_profile' action)
     (edit-profile:~(. io bowl) wire (decode:contact args))
-  ?:  |(=('add_contact' action) =('remove_contact' action))
+  ?:  |(=('add_contact' action) =('remove_contact' action) =('refresh_contact' action))
     =/  who  (ship:spec (required:spec args 'ship' 128))
     =/  act=action:ct
       ?:  =('add_contact' action)  [%page who ~]
+      ::  Refreshing subscribes to the peer's profile without adding a contact.
+      ?:  =('refresh_contact' action)  [%meet ~[who]]
       [%wipe ~[who]]
     [%pass wire %agent [our.bowl %contacts] %poke %contact-action-1 !>(act)]
   ?:  |(=('react' action) =('unreact' action))
@@ -283,7 +310,10 @@
   ?:  |(=('send_dm' action) =('send_channel' action))
     =/  to  (destination:spec args)
     ?>  =(=('send_dm' action) ?=(%dm -.to))
-    (publish:~(. io bowl) wire to (required:spec args 'text' 16.384) sent ~)
+    =/  composed  (compose:attachment args to)
+    ?>  ?=(%& -.composed)
+    =/  [content=story:v9:d meta=(unit data:meta) blob=(unit @t)]  p.composed
+    (publish-story:~(. io bowl) wire to content sent meta blob)
   (group-mutation args wire action)
 ::
 ++  group-mutation

@@ -7,7 +7,7 @@
   |=  topic=@t
   ^-  @t
   ?:  =('' topic)
-    'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads). Read the relevant help before acting.'
+    'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity, mark read, notification levels and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads and group buckets). Read the relevant help before acting.'
   %^  cat  3  (rap 3 sending-guidance '\0a' common-help ~)
   (topic-help topic)
 ++  topic-help
@@ -17,7 +17,7 @@
       %'messages'
     %+  rap  3
     :~  'send_dm(ship,text); send_channel(channel,text). '
-        'Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); '
+        'forward_message(channel,message_id,parent?,to) posts a reference card to that post in to (a ~ship DM, or a joined chat/gallery channel); it adds no text. pin_message(channel,message_id) pins a root post to the top of the channel, unpin_message(channel,message_id) removes it; pinning needs the channel host or a group admin. Attachments: send_channel and send_dm take file or video, a public https URL, sent with or without text; a gallery (heap) post takes one attachment and an optional title. link(http(s) URL) with an optional title posts a bare link card to a gallery channel, with no text. Images are standalone ![description](https://url) lines in text. Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); search_history(query) with neither ship nor channel searches every DM, group DM and joined chat or gallery channel, the newest 500 messages and their replies in each, and returns the 20 newest matches with where each was. '
         'react(ship OR channel,message_id,emoji,parent?); unreact(ship OR channel,message_id,parent?). '
         'send_dm/send_channel also accept parent to message a thread in another conversation. '
         'Use exact message_id values from history; parent is the root message_id, including its author for DMs. '
@@ -30,15 +30,15 @@
       %'contacts'
     %+  rap  3
     :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
-        'Contacts: get_profile(ship?; omitted means self); update_profile(nickname?,bio?,status?,avatar?,cover?); add_contact(ship); remove_contact(ship). '
+        'Contacts: get_profile(ship?; omitted means self); update_profile(nickname?,bio?,status?,avatar?,cover?); add_contact(ship); remove_contact(ship); refresh_contact(ship) re-subscribes to their profile without adding them. '
         'Profile updates affect this ship only; empty fields clear them, omitted fields are preserved. Image fields must be http(s) URLs. '
     ==
       %'groups'
     %+  rap  3
     :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
         'create_group(name,title,description?,privacy?,owner?). '
-        'invite_to_group(group,ship); join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). '
-        'Groups: list_members(group); update_group(group,title?,description?); update_channel(group,channel,title?,description?). '
+        'invite_to_group(group,ship); create_invite_link(group) makes a shareable https://invite.tlon.io link: the first call asks %reel for it and a later call returns it; private and secret groups need the host or an admin. Joining through someone else\'s link is not supported here. join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). Channel kinds in the app: Chat is chat, Gallery is heap, Notebook is notes. Sections arrange a group\'s channels: list_sections(group); create_section(group,title); rename_section(group,section,title); delete_section(group,section) for an empty section other than default; move_channel(group,channel,section) puts a channel last in another section, and with index (0 first) reorders it within its own; order_sections(group,order) takes every section ID once. Arranging needs the group host or an admin. join_channel(channel) and leave_channel(channel) join or leave one chat or gallery channel without leaving the group. '
+        'Groups: list_members(group); update_group(group,title?,description?,image?,cover?); update_channel(group,channel,title?,description?,image?,cover?); image and cover are an http(s) URL or a color. '
         'Metadata updates preserve omitted fields and existing channel permissions; at least one edited field is required. '
         'Roles: list_roles(group); create_role(group,role,title,description?); update_role(group,role,title?,description?); '
         'assign_role(group,role,ship); remove_role(group,role,ship); promote_member(group,ship,role?); demote_member(group,ship). '
@@ -57,7 +57,8 @@
       %'inbox'
     %+  rap  3
     :~
-      'Inbox: activity_inbox(filter=all|mentions|replies|unreads,cursor?,offset?). Group DMs: list_clubs; get_club(club); create_club(ship); invite_to_club(club,ship); accept_club_invite/decline_club_invite/leave_club(club); send_club(club,text,parent?); club_history(club,parent?,cursor?); search_club_history(club,query,parent?,cursor?). Club IDs are native 0v values; parent IDs include the author. send_club is for separate messages, never duplicating an automatically delivered final reply. '
+      'Inbox: activity_inbox(filter=all|mentions|replies|unreads,cursor?,offset?). Read state and notifications act on this ship\'s own account, not on another ship\'s: mark_read(ship OR club OR group OR channel, or scope=all) marks a chat, or every chat, read; it cannot be undone, so use it only on request. get_notification_levels(offset?) lists the app-wide base level and per-chat overrides. mute(ship OR club OR group OR channel) silences a DM, group DM or channel (hush) or a group (soft: only mentions and replies); unmute(...) returns it to the inherited level. set_notification_level(ship OR club OR group OR channel, level=loud|medium|soft|hush|default) sets one chat; DMs take medium, hush or default. set_notification_level(scope=base, level=medium|soft|hush) sets the app-wide level. Clearing unreads is mark_read, not a level change. Notes channel levels are not supported. '
+      'Group DMs: list_clubs; get_club(club); create_club(ship); invite_to_club(club,ship); accept_club_invite/decline_club_invite/leave_club(club); send_club(club,text,parent?); club_history(club,parent?,cursor?); search_club_history(club,query,parent?,cursor?). Club IDs are native 0v values; parent IDs include the author. send_club is for separate messages, never duplicating an automatically delivered final reply. '
       'get_club_message(club,message_id,parent?,offset?) reads a complete group-DM post or reply in chunks. delete_club_message(club,message_id,parent?,confirm=message_id) deletes only this ship\'s own message after explicit user authorization. '
     ==
       %'notes'
@@ -86,7 +87,7 @@
       %'files'
     %+  rap  3
     :~
-      'Files: upload_image(url OR path); upload_file(url OR path). Requires configured Tlon storage. URL sources must be public HTTPS DNS names, with no redirects or credentials. Clay paths are /desk/path/ext and additionally require the conversation\'s Clay read grant; operating-system paths are not supported. Limit 8 MiB. Supports PNG/JPEG/GIF/WebP images, text, Markdown, CSV, JSON, PDF, ZIP, MP3/OGG/WAV, MP4 and binary downloads; HTML, SVG and executable MIME types are not supported. Uploads may be publicly accessible under storage policy; upload only user-authorized material. '
+      'Buckets are a group\'s shared files and folders: list_buckets; list_bucket_files(bucket,folder_id?) lists one folder, the root when folder_id is omitted; search_bucket_files(bucket,query) matches names, uploaders and file types. create_bucket(group,name,title,readers?,writers?) needs the group host or an admin; readers and writers are JSON-array strings of role IDs, [] meaning everyone. create_bucket_folder(bucket,name,folder_id?); rename_bucket_entry(bucket,entry_id,name); move_bucket_entry(bucket,entry_id,new_parent?), the root when new_parent is omitted; delete_bucket_folder(bucket,entry_id) for an empty folder; set_bucket_writers(bucket,writers). Reading, uploading or deleting a file\'s contents is done in the app, not here. Files: upload_image(url OR path); upload_file(url OR path). Requires configured Tlon storage. URL sources must be public HTTPS DNS names, with no redirects or credentials. Clay paths are /desk/path/ext and additionally require the conversation\'s Clay read grant; operating-system paths are not supported. Limit 8 MiB. Supports PNG/JPEG/GIF/WebP images, text, Markdown, CSV, JSON, PDF, ZIP, MP3/OGG/WAV, MP4 and binary downloads; HTML, SVG and executable MIME types are not supported. Uploads may be publicly accessible under storage policy; upload only user-authorized material. '
     ==
   ==
 ++  common-help
@@ -218,6 +219,14 @@
           (field 'Directory or full-message byte offset, decimal string; defaults to 0')
       ==
       ['filter' (field 'Activity filter: all, mentions, replies or unreads')]
+      :*  'level'
+          %-  field
+          'Notification level: loud, medium, soft, hush or default; scope=base takes medium, soft or hush'
+      ==
+      :*  'scope'
+          %-  field
+          'mark_read: all for every chat; set_notification_level: base for the app-wide level'
+      ==
       ['club' (field 'Exact native group DM 0v ID from list_clubs')]
       :*  'citation'
           %-  field
@@ -231,6 +240,19 @@
           (field 'Exact message_id from history; DMs include ~author/ prefix')
       ==
       ['emoji' (field 'Reaction text, 1..64 bytes')]
+      :*  'to'
+          (field 'forward_message destination: a ~ship DM or an exact chat/gallery channel ID')
+      ==
+      ['image' (field 'Group/channel image: http(s) URL or color, at most 2048 bytes')]
+      ['link' (field 'send_channel to a gallery: http(s) URL to post as a link card')]
+      ['file' (field 'send_channel/send_dm: public https URL of a file to attach')]
+      ['video' (field 'send_channel/send_dm: public https URL of a video to attach')]
+      ['section' (field 'Exact section ID from list_sections')]
+      ['index' (field 'move_channel: position within the section, decimal string, 0 first')]
+      ['order' (field 'order_sections: JSON-array string of every section ID, in order')]
+      ['bucket' (field 'Exact ~ship/name bucket ID from list_buckets')]
+      ['entry_id' (field 'Exact decimal-string entry ID from list_bucket_files')]
+      ['writers' (field 'Bucket writers: JSON-array string of role IDs; [] means every reader')]
       ['query' (field 'Case-insensitive history search, 1..128 bytes')]
       :*  'cursor'
           %-  field
@@ -273,7 +295,7 @@
       ['bio' (field 'Own profile bio, at most 1024 bytes; empty clears')]
       ['status' (field 'Own profile status, at most 128 bytes; empty clears')]
       ['avatar' (field 'Own avatar http(s) URL, at most 2048 bytes; empty clears')]
-      ['cover' (field 'Own cover http(s) URL, at most 2048 bytes; empty clears')]
+      ['cover' (field 'Profile, group or channel cover: http(s) URL or color; max 2048 bytes')]
   ==
 ::
 ++  field
