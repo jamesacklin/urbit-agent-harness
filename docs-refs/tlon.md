@@ -85,6 +85,10 @@ Trusted ships need an explicit grant; current-chat tools do not imply it.
 
 Final answers return to the originating chat automatically. Use `send_dm` or
 `send_channel` for separate messages elsewhere; optional `parent` selects a thread.
+Both take `file` or `video`, a public HTTPS URL without credentials, recorded in
+the post's blob as the app's typed entries with an unknown size. A gallery (heap)
+post takes one attachment and an optional `title`; `link` instead posts a bare
+link card to a gallery, with no text.
 
 New groups default to secret (unlisted and invite-only), with no channels.
 Create channels afterward; they are readable and writable by all group members.
@@ -104,14 +108,19 @@ views, so concurrent directory changes can shift positions.
 including the author prefix for DMs. Each page returns up to 20 messages, with
 800-byte text previews and explicit truncation flags. Search scans at most 64
 rows per page; follow `next_cursor` even when a page has no matches. Cursors are
-bound to the destination, parent and query. `react`/`unreact` accept only messages
+bound to the destination, parent and query. `search_history` with neither `ship`
+nor `channel` searches every DM, group DM and joined chat or gallery channel with
+the native bounded search: the newest 500 messages and their replies in up to 40
+chats, returning the 20 newest matches with where each was. `react`/`unreact` accept only messages
 in the latest 20-message conversation/thread window. `list_dms` includes active
 DMs and invitations, not archived conversations.
 
 `get_profile` defaults to self, or reads a known contact when given `ship`.
 `update_profile` edits only supplied nickname, bio, status, avatar or cover fields;
 empty strings clear those fields. `update_group` and `update_channel` similarly
-preserve omitted metadata, images, and channel permissions. These actions do not
+preserve omitted metadata and channel permissions; their `image` and `cover` take
+a URL or a color, and an empty value keeps the current one. `refresh_contact`
+re-subscribes to a peer's profile without adding them as a contact. These actions do not
 change Harness ownership or grants. Adding a Tlon contact does not authorize it
 to use the bot.
 
@@ -167,6 +176,35 @@ The same grant also covers:
   transport acknowledgement alone is not reported as a saved edit.
   If native notebook deletion times out after removing the book, the adapter
   checks the native directory and reports the observed absence, without retrying.
+- Read state and notification levels of this ship's own account: `mark_read`
+  for one DM, group DM, group or channel, or `scope: "all"`; `mute`, `unmute`,
+  `set_notification_level` and `get_notification_levels`. Levels are the app's
+  presets (loud, medium, soft, hush, default) with its limits: DMs take medium,
+  hush or default, and the app-wide base takes medium, soft or hush. Muting a
+  group keeps mentions and replies. Another ship's notifications, such as the
+  owner's when Harness runs on a moon, are out of reach.
+- `pin_message` and `unpin_message` write a channel's arranged order with the
+  pinned root post first, for the channel host or a group admin.
+  `forward_message` posts a reference card to a channel post or reply into a DM
+  or a joined chat or gallery channel.
+- One channel's membership: `join_channel` and `leave_channel` act on a chat or
+  gallery channel without leaving its group.
+- Group sections: `list_sections`, `create_section`, `rename_section`,
+  `move_channel`, `order_sections`, and `delete_section` for an empty section
+  other than the default. Each is one native command for the group host or an
+  admin; `move_channel` appends a channel to another section, or with `index`
+  reorders it within its own.
+- `create_invite_link` asks `%reel` for a group's shareable link, then returns
+  `https://invite.tlon.io/<token>` on a later call and enables `%grouper`.
+  Private and secret groups need the host or an admin. Joining through someone
+  else's link needs the invite provider's HTTP API and is not offered.
+- Group buckets: `list_buckets`, `list_bucket_files`, `search_bucket_files`,
+  `create_bucket`, `create_bucket_folder`, `rename_bucket_entry`,
+  `move_bucket_entry`, `delete_bucket_folder` (empty folders) and
+  `set_bucket_writers`. Changes go to this ship's `%buckets`, which forwards
+  them to the host; a bucket's host must be a planet. File bytes move through
+  Tlon's Memex service over HTTP, so reading, uploading and deleting files are
+  left to the app.
 - `upload_image` and `upload_file` reuse the existing upload implementation,
   storage settings, signing, durable receipts and bounded transfer handling.
   They add ship-wide access and non-image files. A `path` is a ship-local Clay
