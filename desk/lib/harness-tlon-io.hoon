@@ -25,7 +25,12 @@
 ++  publish
   |=  [wire=wire to=destination:t text=@t sent=@da blob=(unit @t)]
   ^-  card
-  =/  =memo:v9:dv  [(text-to-story:story text) our.bowl sent]
+  (publish-story wire to (text-to-story:story text) sent blob)
+::
+++  publish-story
+  |=  [wire=wire to=destination:t content=story:v9:dv sent=@da blob=(unit @t)]
+  ^-  card
+  =/  =memo:v9:dv  [content our.bowl sent]
   ?-  -.to
       %dm
     =/  =diff:dm:v7:cv

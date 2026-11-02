@@ -17,7 +17,7 @@
       %'messages'
     %+  rap  3
     :~  'send_dm(ship,text); send_channel(channel,text). '
-        'Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); '
+        'forward_message(channel,message_id,parent?,to) posts a reference card to that post in to (a ~ship DM, or a joined chat/gallery channel); it adds no text. pin_message(channel,message_id) pins a root post to the top of the channel, unpin_message(channel,message_id) removes it; pinning needs the channel host or a group admin. Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); '
         'react(ship OR channel,message_id,emoji,parent?); unreact(ship OR channel,message_id,parent?). '
         'send_dm/send_channel also accept parent to message a thread in another conversation. '
         'Use exact message_id values from history; parent is the root message_id, including its author for DMs. '
@@ -30,15 +30,15 @@
       %'contacts'
     %+  rap  3
     :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
-        'Contacts: get_profile(ship?; omitted means self); update_profile(nickname?,bio?,status?,avatar?,cover?); add_contact(ship); remove_contact(ship). '
+        'Contacts: get_profile(ship?; omitted means self); update_profile(nickname?,bio?,status?,avatar?,cover?); add_contact(ship); remove_contact(ship); refresh_contact(ship) re-subscribes to their profile without adding them. '
         'Profile updates affect this ship only; empty fields clear them, omitted fields are preserved. Image fields must be http(s) URLs. '
     ==
       %'groups'
     %+  rap  3
     :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
         'create_group(name,title,description?,privacy?,owner?). '
-        'invite_to_group(group,ship); join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). '
-        'Groups: list_members(group); update_group(group,title?,description?); update_channel(group,channel,title?,description?). '
+        'invite_to_group(group,ship); join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). Channel kinds in the app: Chat is chat, Gallery is heap, Notebook is notes. Sections arrange a group\'s channels: list_sections(group); create_section(group,title); rename_section(group,section,title); delete_section(group,section) for an empty section other than default; move_channel(group,channel,section) puts a channel last in another section, and with index (0 first) reorders it within its own; order_sections(group,order) takes every section ID once. Arranging needs the group host or an admin. join_channel(channel) and leave_channel(channel) join or leave one chat or gallery channel without leaving the group. '
+        'Groups: list_members(group); update_group(group,title?,description?,image?,cover?); update_channel(group,channel,title?,description?,image?,cover?); image and cover are an http(s) URL or a color. '
         'Metadata updates preserve omitted fields and existing channel permissions; at least one edited field is required. '
         'Roles: list_roles(group); create_role(group,role,title,description?); update_role(group,role,title?,description?); '
         'assign_role(group,role,ship); remove_role(group,role,ship); promote_member(group,ship,role?); demote_member(group,ship). '
@@ -240,6 +240,13 @@
           (field 'Exact message_id from history; DMs include ~author/ prefix')
       ==
       ['emoji' (field 'Reaction text, 1..64 bytes')]
+      :*  'to'
+          (field 'forward_message destination: a ~ship DM or an exact chat/gallery channel ID')
+      ==
+      ['image' (field 'Group/channel image: http(s) URL or color, at most 2048 bytes')]
+      ['section' (field 'Exact section ID from list_sections')]
+      ['index' (field 'move_channel: position within the section, decimal string, 0 first')]
+      ['order' (field 'order_sections: JSON-array string of every section ID, in order')]
       ['query' (field 'Case-insensitive history search, 1..128 bytes')]
       :*  'cursor'
           %-  field
@@ -282,7 +289,7 @@
       ['bio' (field 'Own profile bio, at most 1024 bytes; empty clears')]
       ['status' (field 'Own profile status, at most 128 bytes; empty clears')]
       ['avatar' (field 'Own avatar http(s) URL, at most 2048 bytes; empty clears')]
-      ['cover' (field 'Own cover http(s) URL, at most 2048 bytes; empty clears')]
+      ['cover' (field 'Profile, group or channel cover: http(s) URL or color; max 2048 bytes')]
   ==
 ::
 ++  field

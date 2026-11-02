@@ -9,7 +9,8 @@
     message=harness-tlon-message-tool
 /+  notes=harness-tlon-notes-tool, inbox=harness-tlon-inbox-tool, club=harness-tlon-club-tool
 /+  hooks=harness-tlon-hook-tool, publishing=harness-tlon-publish-tool,
-    activity=harness-tlon-activity-tool
+    activity=harness-tlon-activity-tool, channel=harness-tlon-channel-tool,
+    section=harness-tlon-section-tool
 /+  migration=harness-tlon-notes-migration, paths=harness-tlon-paths
 |_  bowl=bowl:gall
 +*  read-path  ~(. paths [our now]:bowl)
@@ -30,10 +31,19 @@
 ++  metadata
   |=  [args=json old=data:meta]
   ^-  data:meta
-  ?>  |((has:spec args 'title') (has:spec args 'description'))
+  ?>  (lien `(list @t)`~['title' 'description' 'image' 'cover'] |=(key=@t (has:spec args key)))
   =/  title  (string:spec args 'title' title.old 128)
   ?>  !=('' title)
-  old(title title, description (string:spec args 'description' description.old 1.024))
+  ::  Image and cover are a URL or a color, as the app stores them. Empty
+  ::  keeps the current value: models fill unused arguments with ''.
+  =/  kept
+    |=  [key=@t current=@t]
+    =/  value  (string:spec args key current 2.048)
+    ?:(=('' value) current value)
+  :^  title
+    (string:spec args 'description' description.old 1.024)
+    (kept 'image' image.old)
+  (kept 'cover' cover.old)
 ::
 ++  channel-permissions
   |=  args=json
@@ -216,6 +226,8 @@
   ?:  (handles:~(. notes bowl) action)  (run:~(. notes bowl) args wire)
   ?:  =('activity_inbox' action)  [(en:json:html (read:~(. inbox bowl) args)) ~]
   ?:  (handles:~(. activity bowl) action)  (run:~(. activity bowl) args wire)
+  ?:  (handles:~(. channel bowl) action)  (run:~(. channel bowl) args wire sent)
+  ?:  (handles:~(. section bowl) action)  (run:~(. section bowl) args wire)
   ?:  (handles:~(. club bowl) action)  (run:~(. club bowl) args wire sent)
   ?:  (handles:~(. group-tool bowl) action)
     (run:~(. group-tool bowl) args wire)
@@ -269,10 +281,12 @@
     [%pass wire %agent [our.bowl %channels] %poke %channel-action-2 !>(act)]
   ?:  =('update_profile' action)
     (edit-profile:~(. io bowl) wire (decode:contact args))
-  ?:  |(=('add_contact' action) =('remove_contact' action))
+  ?:  |(=('add_contact' action) =('remove_contact' action) =('refresh_contact' action))
     =/  who  (ship:spec (required:spec args 'ship' 128))
     =/  act=action:ct
       ?:  =('add_contact' action)  [%page who ~]
+      ::  Refreshing subscribes to the peer's profile without adding a contact.
+      ?:  =('refresh_contact' action)  [%meet ~[who]]
       [%wipe ~[who]]
     [%pass wire %agent [our.bowl %contacts] %poke %contact-action-1 !>(act)]
   ?:  |(=('react' action) =('unreact' action))
