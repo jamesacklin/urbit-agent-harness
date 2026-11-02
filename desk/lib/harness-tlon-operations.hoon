@@ -8,7 +8,8 @@
     group-tool=harness-tlon-group-tool, policy=harness-tlon-group-policy,
     message=harness-tlon-message-tool
 /+  notes=harness-tlon-notes-tool, inbox=harness-tlon-inbox-tool, club=harness-tlon-club-tool
-/+  hooks=harness-tlon-hook-tool, publishing=harness-tlon-publish-tool
+/+  hooks=harness-tlon-hook-tool, publishing=harness-tlon-publish-tool,
+    activity=harness-tlon-activity-tool
 /+  migration=harness-tlon-notes-migration, paths=harness-tlon-paths
 |_  bowl=bowl:gall
 +*  read-path  ~(. paths [our now]:bowl)
@@ -214,6 +215,7 @@
   ?:  =('resolve_citation' action)  $(args (citation-arguments args))
   ?:  (handles:~(. notes bowl) action)  (run:~(. notes bowl) args wire)
   ?:  =('activity_inbox' action)  [(en:json:html (read:~(. inbox bowl) args)) ~]
+  ?:  (handles:~(. activity bowl) action)  (run:~(. activity bowl) args wire)
   ?:  (handles:~(. club bowl) action)  (run:~(. club bowl) args wire sent)
   ?:  (handles:~(. group-tool bowl) action)
     (run:~(. group-tool bowl) args wire)

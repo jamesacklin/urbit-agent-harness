@@ -7,7 +7,7 @@
   |=  topic=@t
   ^-  @t
   ?:  =('' topic)
-    'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads). Read the relevant help before acting.'
+    'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity, mark read, notification levels and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads). Read the relevant help before acting.'
   %^  cat  3  (rap 3 sending-guidance '\0a' common-help ~)
   (topic-help topic)
 ++  topic-help
@@ -57,7 +57,8 @@
       %'inbox'
     %+  rap  3
     :~
-      'Inbox: activity_inbox(filter=all|mentions|replies|unreads,cursor?,offset?). Group DMs: list_clubs; get_club(club); create_club(ship); invite_to_club(club,ship); accept_club_invite/decline_club_invite/leave_club(club); send_club(club,text,parent?); club_history(club,parent?,cursor?); search_club_history(club,query,parent?,cursor?). Club IDs are native 0v values; parent IDs include the author. send_club is for separate messages, never duplicating an automatically delivered final reply. '
+      'Inbox: activity_inbox(filter=all|mentions|replies|unreads,cursor?,offset?). Read state and notifications act on this ship\'s own account, not on another ship\'s: mark_read(ship OR club OR group OR channel, or scope=all) marks a chat, or every chat, read; it cannot be undone, so use it only on request. get_notification_levels(offset?) lists the app-wide base level and per-chat overrides. mute(ship OR club OR group OR channel) silences a DM, group DM or channel (hush) or a group (soft: only mentions and replies); unmute(...) returns it to the inherited level. set_notification_level(ship OR club OR group OR channel, level=loud|medium|soft|hush|default) sets one chat; DMs take medium, hush or default. set_notification_level(scope=base, level=medium|soft|hush) sets the app-wide level. Clearing unreads is mark_read, not a level change. Notes channel levels are not supported. '
+      'Group DMs: list_clubs; get_club(club); create_club(ship); invite_to_club(club,ship); accept_club_invite/decline_club_invite/leave_club(club); send_club(club,text,parent?); club_history(club,parent?,cursor?); search_club_history(club,query,parent?,cursor?). Club IDs are native 0v values; parent IDs include the author. send_club is for separate messages, never duplicating an automatically delivered final reply. '
       'get_club_message(club,message_id,parent?,offset?) reads a complete group-DM post or reply in chunks. delete_club_message(club,message_id,parent?,confirm=message_id) deletes only this ship\'s own message after explicit user authorization. '
     ==
       %'notes'
@@ -218,6 +219,14 @@
           (field 'Directory or full-message byte offset, decimal string; defaults to 0')
       ==
       ['filter' (field 'Activity filter: all, mentions, replies or unreads')]
+      :*  'level'
+          %-  field
+          'Notification level: loud, medium, soft, hush or default; scope=base takes medium, soft or hush'
+      ==
+      :*  'scope'
+          %-  field
+          'mark_read: all for every chat; set_notification_level: base for the app-wide level'
+      ==
       ['club' (field 'Exact native group DM 0v ID from list_clubs')]
       :*  'citation'
           %-  field
