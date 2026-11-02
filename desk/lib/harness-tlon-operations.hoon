@@ -11,7 +11,8 @@
 /+  hooks=harness-tlon-hook-tool, publishing=harness-tlon-publish-tool,
     activity=harness-tlon-activity-tool, channel=harness-tlon-channel-tool,
     section=harness-tlon-section-tool, attachment=harness-tlon-attachment,
-    search=harness-tlon-search-tool, invite=harness-tlon-invite-tool
+    search=harness-tlon-search-tool, invite=harness-tlon-invite-tool,
+    bucket=harness-tlon-bucket-tool
 /+  migration=harness-tlon-notes-migration, paths=harness-tlon-paths
 |_  bowl=bowl:gall
 +*  read-path  ~(. paths [our now]:bowl)
@@ -230,6 +231,7 @@
   ?:  (handles:~(. channel bowl) action)  (run:~(. channel bowl) args wire sent)
   ?:  (handles:~(. section bowl) action)  (run:~(. section bowl) args wire)
   ?:  (handles:~(. invite bowl) action)  (run:~(. invite bowl) args wire)
+  ?:  (handles:~(. bucket bowl) action)  (run:~(. bucket bowl) args wire)
   ?:  (handles:~(. club bowl) action)  (run:~(. club bowl) args wire sent)
   ?:  (handles:~(. group-tool bowl) action)
     (run:~(. group-tool bowl) args wire)

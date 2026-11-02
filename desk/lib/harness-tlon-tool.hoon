@@ -7,7 +7,7 @@
   |=  topic=@t
   ^-  @t
   ?:  =('' topic)
-    'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity, mark read, notification levels and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads). Read the relevant help before acting.'
+    'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity, mark read, notification levels and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads and group buckets). Read the relevant help before acting.'
   %^  cat  3  (rap 3 sending-guidance '\0a' common-help ~)
   (topic-help topic)
 ++  topic-help
@@ -87,7 +87,7 @@
       %'files'
     %+  rap  3
     :~
-      'Files: upload_image(url OR path); upload_file(url OR path). Requires configured Tlon storage. URL sources must be public HTTPS DNS names, with no redirects or credentials. Clay paths are /desk/path/ext and additionally require the conversation\'s Clay read grant; operating-system paths are not supported. Limit 8 MiB. Supports PNG/JPEG/GIF/WebP images, text, Markdown, CSV, JSON, PDF, ZIP, MP3/OGG/WAV, MP4 and binary downloads; HTML, SVG and executable MIME types are not supported. Uploads may be publicly accessible under storage policy; upload only user-authorized material. '
+      'Buckets are a group\'s shared files and folders: list_buckets; list_bucket_files(bucket,folder_id?) lists one folder, the root when folder_id is omitted; search_bucket_files(bucket,query) matches names, uploaders and file types. create_bucket(group,name,title,readers?,writers?) needs the group host or an admin; readers and writers are JSON-array strings of role IDs, [] meaning everyone. create_bucket_folder(bucket,name,folder_id?); rename_bucket_entry(bucket,entry_id,name); move_bucket_entry(bucket,entry_id,new_parent?), the root when new_parent is omitted; delete_bucket_folder(bucket,entry_id) for an empty folder; set_bucket_writers(bucket,writers). Reading, uploading or deleting a file\'s contents is done in the app, not here. Files: upload_image(url OR path); upload_file(url OR path). Requires configured Tlon storage. URL sources must be public HTTPS DNS names, with no redirects or credentials. Clay paths are /desk/path/ext and additionally require the conversation\'s Clay read grant; operating-system paths are not supported. Limit 8 MiB. Supports PNG/JPEG/GIF/WebP images, text, Markdown, CSV, JSON, PDF, ZIP, MP3/OGG/WAV, MP4 and binary downloads; HTML, SVG and executable MIME types are not supported. Uploads may be publicly accessible under storage policy; upload only user-authorized material. '
     ==
   ==
 ++  common-help
@@ -250,6 +250,9 @@
       ['section' (field 'Exact section ID from list_sections')]
       ['index' (field 'move_channel: position within the section, decimal string, 0 first')]
       ['order' (field 'order_sections: JSON-array string of every section ID, in order')]
+      ['bucket' (field 'Exact ~ship/name bucket ID from list_buckets')]
+      ['entry_id' (field 'Exact decimal-string entry ID from list_bucket_files')]
+      ['writers' (field 'Bucket writers: JSON-array string of role IDs; [] means every reader')]
       ['query' (field 'Case-insensitive history search, 1..128 bytes')]
       :*  'cursor'
           %-  field
