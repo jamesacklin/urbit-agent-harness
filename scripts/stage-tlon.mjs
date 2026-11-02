@@ -41,6 +41,6 @@ async function stage(kind, name) {
   await mkdir(path.dirname(target), { recursive: true })
   await writeFile(target, lines.join('\n'))
 }
-for (const name of ['activity-ver', 'chat-ver', 'channels', 'contacts', 'story', 'groups', 'presence', 'notes', 'hooks', 'steward', 'steward/lens']) await stage('sur', name)
+for (const name of ['activity-ver', 'chat-ver', 'channels', 'contacts', 'story', 'groups', 'presence', 'notes', 'hooks', 'steward', 'steward/lens', 'reel']) await stage('sur', name)
 for (const name of ['channel-json', 'groups-json', 'story-json', 'logs']) await stage('lib', name)
 console.log(`Tlon: ${visited.size} namespaced protocol dependencies at ${revision.slice(0, 12)}`)

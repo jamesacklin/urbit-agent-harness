@@ -114,6 +114,6 @@
       ==
     ['error: forward to a ~ship DM, or to a chat or gallery channel this ship has joined' ~]
   =/  reference=story:v9:dv  ~[[%block %cite %chan [kind.nest ship.nest name.nest] where]]
-  :_  `(publish-story:~(. io bowl) wire to reference sent ~)
+  :_  `(publish-story:~(. io bowl) wire to reference sent ~ ~)
   'accepted: local Tlon acknowledged forward_message; the post is a reference card to the original'
 --

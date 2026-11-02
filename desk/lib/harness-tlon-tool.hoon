@@ -17,7 +17,7 @@
       %'messages'
     %+  rap  3
     :~  'send_dm(ship,text); send_channel(channel,text). '
-        'forward_message(channel,message_id,parent?,to) posts a reference card to that post in to (a ~ship DM, or a joined chat/gallery channel); it adds no text. pin_message(channel,message_id) pins a root post to the top of the channel, unpin_message(channel,message_id) removes it; pinning needs the channel host or a group admin. Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); '
+        'forward_message(channel,message_id,parent?,to) posts a reference card to that post in to (a ~ship DM, or a joined chat/gallery channel); it adds no text. pin_message(channel,message_id) pins a root post to the top of the channel, unpin_message(channel,message_id) removes it; pinning needs the channel host or a group admin. Attachments: send_channel and send_dm take file or video, a public https URL, sent with or without text; a gallery (heap) post takes one attachment and an optional title. link(http(s) URL) with an optional title posts a bare link card to a gallery channel, with no text. Images are standalone ![description](https://url) lines in text. Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); search_history(query) with neither ship nor channel searches every DM, group DM and joined chat or gallery channel, the newest 500 messages and their replies in each, and returns the 20 newest matches with where each was. '
         'react(ship OR channel,message_id,emoji,parent?); unreact(ship OR channel,message_id,parent?). '
         'send_dm/send_channel also accept parent to message a thread in another conversation. '
         'Use exact message_id values from history; parent is the root message_id, including its author for DMs. '
@@ -37,7 +37,7 @@
     %+  rap  3
     :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
         'create_group(name,title,description?,privacy?,owner?). '
-        'invite_to_group(group,ship); join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). Channel kinds in the app: Chat is chat, Gallery is heap, Notebook is notes. Sections arrange a group\'s channels: list_sections(group); create_section(group,title); rename_section(group,section,title); delete_section(group,section) for an empty section other than default; move_channel(group,channel,section) puts a channel last in another section, and with index (0 first) reorders it within its own; order_sections(group,order) takes every section ID once. Arranging needs the group host or an admin. join_channel(channel) and leave_channel(channel) join or leave one chat or gallery channel without leaving the group. '
+        'invite_to_group(group,ship); create_invite_link(group) makes a shareable https://invite.tlon.io link: the first call asks %reel for it and a later call returns it; private and secret groups need the host or an admin. Joining through someone else\'s link is not supported here. join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). Channel kinds in the app: Chat is chat, Gallery is heap, Notebook is notes. Sections arrange a group\'s channels: list_sections(group); create_section(group,title); rename_section(group,section,title); delete_section(group,section) for an empty section other than default; move_channel(group,channel,section) puts a channel last in another section, and with index (0 first) reorders it within its own; order_sections(group,order) takes every section ID once. Arranging needs the group host or an admin. join_channel(channel) and leave_channel(channel) join or leave one chat or gallery channel without leaving the group. '
         'Groups: list_members(group); update_group(group,title?,description?,image?,cover?); update_channel(group,channel,title?,description?,image?,cover?); image and cover are an http(s) URL or a color. '
         'Metadata updates preserve omitted fields and existing channel permissions; at least one edited field is required. '
         'Roles: list_roles(group); create_role(group,role,title,description?); update_role(group,role,title?,description?); '
@@ -244,6 +244,9 @@
           (field 'forward_message destination: a ~ship DM or an exact chat/gallery channel ID')
       ==
       ['image' (field 'Group/channel image: http(s) URL or color, at most 2048 bytes')]
+      ['link' (field 'send_channel to a gallery: http(s) URL to post as a link card')]
+      ['file' (field 'send_channel/send_dm: public https URL of a file to attach')]
+      ['video' (field 'send_channel/send_dm: public https URL of a video to attach')]
       ['section' (field 'Exact section ID from list_sections')]
       ['index' (field 'move_channel: position within the section, decimal string, 0 first')]
       ['order' (field 'order_sections: JSON-array string of every section ID, in order')]
