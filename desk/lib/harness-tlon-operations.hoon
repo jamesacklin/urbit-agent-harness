@@ -109,9 +109,26 @@
     ==
   (directory:spec args items)
 ::
+++  channel-directory
+  |=  args=json
+  ^-  json
+  %+  directory:spec  args
+  %-  zing
+  %+  turn  ~(tap by groups)
+  |=  [flag=[@p @tas] group=group:v9:g]
+  %+  turn  ~(tap by channels.group)
+  |=  [nest=[@tas @p @tas] channel=channel:v9:g]
+  %-  pairs:enjs:format
+  :~  ['channel' %s (channel-id nest)]
+      ['title' %s title.meta.channel]
+      ['group' %s (group-id flag)]
+      ['group_title' %s title.meta.group]
+  ==
+::
 ++  group-details
   |=  [args=json action=@t]
   ^-  json
+  ?:  &(=('list_channels' action) !(has:spec args 'group'))  (channel-directory args)
   =/  flag  (flag:spec (required:spec args 'group' 256))
   =/  group  (~(got by groups) flag)
   ?:  =('list_members' action)

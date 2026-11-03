@@ -13,7 +13,20 @@
   ?:  =('' topic)
     'Use action help with topic: messages (read, search, send, react), contacts (profiles), groups (channels, membership, roles), inbox (activity, mark read, notification levels and group DMs), notes (notebooks and documents), hooks (channel programs), publishing (public snapshots), files (uploads and group buckets). Read the relevant help before acting.'
   %^  cat  3  (rap 3 sending-guidance '\0a' common-help ~)
-  (topic-help topic)
+  (topic-help (topic-alias topic))
+::  The index names each topic's contents; a model often asks for one of those
+::  instead of the topic, so they lead to the topic that holds them.
+++  topic-alias
+  |=  topic=@t
+  ^-  @t
+  ?+  topic  topic
+    ?(%'history' %'search' %'send' %'react' %'dms' %'dm' %'message')  'messages'
+    ?(%'profile' %'profiles' %'contact')  'contacts'
+    ?(%'channels' %'channel' %'group' %'roles' %'members' %'sections')  'groups'
+    ?(%'activity' %'notifications' %'unread' %'mute' %'clubs')  'inbox'
+    ?(%'notebooks' %'notebook' %'documents')  'notes'
+    ?(%'uploads' %'upload' %'buckets' %'bucket')  'files'
+  ==
 ++  topic-help
   |=  topic=@t
   ^-  @t
@@ -21,7 +34,7 @@
       %'messages'
     %+  rap  3
     :~  'send_dm(ship,text); send_channel(channel,text). '
-        'forward_message(channel,message_id,parent?,to) posts a reference card to that post in to (a ~ship DM, or a joined chat/gallery channel); it adds no text. pin_message(channel,message_id) pins a root post to the top of the channel, unpin_message(channel,message_id) removes it; pinning needs the channel host or a group admin. Attachments: send_channel and send_dm take file or video, a public https URL, sent with or without text; a gallery (heap) post takes one attachment and an optional title. link(http(s) URL) with an optional title posts a bare link card to a gallery channel, with no text. Images are standalone ![description](https://url) lines in text. Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); search_history(query) with neither ship nor channel searches every DM, group DM and joined chat or gallery channel, the newest 500 messages and their replies in each, and returns the 20 newest matches with where each was. '
+        'A full ~ship name in text, such as ~sampel-palnet, becomes a mention that notifies that ship: to tag or ping someone, include theirs. forward_message(channel,message_id,parent?,to) posts a reference card to that post in to (a ~ship DM, or a joined chat/gallery channel); it adds no text. pin_message(channel,message_id) pins a root post to the top of the channel, unpin_message(channel,message_id) removes it; pinning needs the channel host or a group admin. Attachments: send_channel and send_dm take file or video, a public https URL, sent with or without text; a gallery (heap) post takes one attachment and an optional title. link(http(s) URL) with an optional title posts a bare link card to a gallery channel, with no text. Images are standalone ![description](https://url) lines in text. Conversation actions: list_dms; history(ship OR channel,parent?,cursor?); search_history(ship OR channel,query,parent?,cursor?); search_history(query) with neither ship nor channel searches every DM, group DM and joined chat or gallery channel, the newest 500 messages and their replies in each, and returns the 20 newest matches with where each was. '
         'react(ship OR channel,message_id,emoji,parent?); unreact(ship OR channel,message_id,parent?). '
         'send_dm/send_channel also accept parent to message a thread in another conversation. '
         'Use exact message_id values from history; parent is the root message_id, including its author for DMs. '
@@ -33,14 +46,14 @@
     ==
       %'contacts'
     %+  rap  3
-    :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
-        'Contacts: get_profile(ship?; omitted means self); update_profile(nickname?,bio?,status?,avatar?,cover?); add_contact(ship); remove_contact(ship); refresh_contact(ship) re-subscribes to their profile without adding them. '
-        'Profile updates affect this ship only; empty fields clear them, omitted fields are preserved. Image fields must be http(s) URLs. '
+    :~  'list_contacts; list_groups; get_group(group); '
+        'list_channels(group?) lists one group\'s channels, or with no group every channel in every joined group with its group. Contacts: get_profile(ship?; omitted means self); update_profile(nickname?,bio?,status?,avatar?,cover?); add_contact(ship); remove_contact(ship); refresh_contact(ship) re-subscribes to their profile without adding them. '
+        'Profile updates affect this ship only; empty fields clear them, omitted fields are preserved. Image fields must be http(s) URLs. Others read your bio and status as you describing yourself, so turn a request like "say you\'re my helper" into your own voice: "I\'m ~sampel-palnet\'s helper". '
     ==
       %'groups'
     %+  rap  3
-    :~  'list_contacts; list_groups; get_group(group); list_channels(group). '
-        'create_group(name,title,description?,privacy?,owner?). '
+    :~  'list_contacts; list_groups; get_group(group); '
+        'list_channels(group?) lists one group\'s channels, or with no group every channel in every joined group with its group. create_group(name,title,description?,privacy?,owner?). '
         'invite_to_group(group,ship); create_invite_link(group) makes a shareable https://invite.tlon.io link: the first call asks %reel for it and a later call returns it; private and secret groups need the host or an admin. Joining through someone else\'s link is not supported here. join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). Channel kinds in the app: Chat is chat, Gallery is heap, Notebook is notes. Sections arrange a group\'s channels: list_sections(group); create_section(group,title); rename_section(group,section,title); delete_section(group,section) for an empty section other than default; move_channel(group,channel,section) puts a channel last in another section, and with index (0 first) reorders it within its own; order_sections(group,order) takes every section ID once. Arranging needs the group host or an admin. join_channel(channel) and leave_channel(channel) join or leave one chat or gallery channel without leaving the group. '
         'Groups: list_members(group); update_group(group,title?,description?,image?,cover?); update_channel(group,channel,title?,description?,image?,cover?); image and cover are an http(s) URL or a color. '
         'Metadata updates preserve omitted fields and existing channel permissions; at least one edited field is required. '
@@ -150,7 +163,9 @@
           'Exact channel ID from list_channels; send_channel is only for a separate message to another/parallel channel, not replying to the current prompt'
       ==
       ['group' (field 'Exact ~ship/name group ID from list_groups')]
-      ['text' (field sending-guidance)]
+      :-  'text'
+      %-  field
+      (cat 3 sending-guidance ' A full ~ship name in text mentions and notifies that ship.')
   ==
 ::
 ++  group-fields
@@ -298,8 +313,11 @@
 ++  profile-fields
   ^-  (list [@t json])
   :~  ['nickname' (field 'Own profile nickname, at most 64 bytes; empty clears')]
-      ['bio' (field 'Own profile bio, at most 1024 bytes; empty clears')]
-      ['status' (field 'Own profile status, at most 128 bytes; empty clears')]
+      :-  'bio'
+      %-  field
+      'Own profile bio, at most 1024 bytes; empty clears. Others read it as this ship describing itself: write it in the first person ("I\'m ~sampel-palnet\'s helper"), not in the requester\'s words'
+      :-  'status'
+      (field 'Own profile status, at most 128 bytes; empty clears. Written as this ship, like bio')
       ['avatar' (field 'Own avatar http(s) URL, at most 2048 bytes; empty clears')]
       ['cover' (field 'Profile, group or channel cover: http(s) URL or color; max 2048 bytes')]
   ==

@@ -24,6 +24,12 @@
   !>  ?&  (find-sub:ht 'searches every DM, group DM and joined channel at once' text)
           (find-sub:ht 'tlon_search_history covers only this conversation' text)
       ==
+++  test-help-topic-aliases
+  %-  expect
+  !>  ?&  =((help:spec 'groups') (help:spec 'channels'))
+          =((help:spec 'contacts') (help:spec 'profile'))
+          =((help:spec 'messages') (help:spec 'history'))
+      ==
 ++  test-identifiers
   %-  expect
   !>  ?&  =([~nec %test] (flag:spec '~nec/test'))
