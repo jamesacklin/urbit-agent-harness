@@ -6,7 +6,7 @@
 ::  The conversation's own search tools sit beside this one in the catalog
 ::  and look like the obvious choice, so name what they miss.
 ++  search-guidance
-  'What was said in Tlon, by you or anyone, is in its DMs and channels: to recall something said in another chat, such as an earlier answer or recommendation, use search_history with only query, which searches every DM, group DM and joined channel at once. tlon_search_history covers only this conversation, and lcm_search only your own sessions.'
+  'What was said in Tlon, by you or anyone, is in its DMs and channels: to recall anything said earlier, such as an answer or recommendation, even one the user places in this conversation, use search_history with only query, which searches this and every other DM, group DM and joined channel at once. tlon_search_history covers only this conversation, and lcm_search only your own sessions.'
 ++  help
   |=  topic=@t
   ^-  @t

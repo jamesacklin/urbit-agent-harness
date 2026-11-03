@@ -21,7 +21,7 @@
 ++  test-cross-chat-search-guidance
   =/  text  (en:json:html schema:spec)
   %-  expect
-  !>  ?&  (find-sub:ht 'searches every DM, group DM and joined channel at once' text)
+  !>  ?&  (find-sub:ht 'searches this and every other DM, group DM and joined channel at once' text)
           (find-sub:ht 'tlon_search_history covers only this conversation' text)
       ==
 ++  test-help-topic-aliases
