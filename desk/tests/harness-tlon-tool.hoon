@@ -18,6 +18,12 @@
           (find-sub:ht 'parallel channels' text)
           (find-sub:ht 'Do not use send_dm or send_channel to answer that conversation' text)
       ==
+++  test-cross-chat-search-guidance
+  =/  text  (en:json:html schema:spec)
+  %-  expect
+  !>  ?&  (find-sub:ht 'searches every DM, group DM and joined channel at once' text)
+          (find-sub:ht 'tlon_search_history covers only this conversation' text)
+      ==
 ++  test-identifiers
   %-  expect
   !>  ?&  =([~nec %test] (flag:spec '~nec/test'))

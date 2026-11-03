@@ -474,7 +474,7 @@
       ==
       %^  fun-json
         'tlon_search_history'
-        'Search a bounded window in this exact conversation. Literal ASCII-case-insensitive substring matching within the first 800 rendered text bytes per message; not a whole-history index. Inspects at most 64 entries and returns at most 20 matches, plus next_cursor. An empty result with has_more is not an exhaustive no-match. Thread parent is separate with parent_matches. Older reads do not expand reaction authority.'
+        'Search a bounded window in this exact conversation. Literal ASCII-case-insensitive substring matching within the first 800 rendered text bytes per message; not a whole-history index. Inspects at most 64 entries and returns at most 20 matches, plus next_cursor. An empty result with has_more is not an exhaustive no-match. Thread parent is separate with parent_matches. Older reads do not expand reaction authority. To find something said in another chat, use the tlon tool\'s search_history with only query.'
       :~  ['query' 'Nonblank literal text, at most 128 bytes']
           :-  'cursor'
           'Optional next_cursor from the same search query in this conversation; empty starts newest'
