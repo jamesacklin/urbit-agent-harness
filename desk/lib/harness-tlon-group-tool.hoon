@@ -65,6 +65,16 @@
     ?:  =('list_roles' action)
       (list-roles args group)
     (list-requests args flag group)
+  ::  The policy refuses a taken name outright; say why, or the model takes
+  ::  over the group that holds the name instead of creating its own.
+  ?:  ?&  =('create_group' action)
+          (~(has by groups) [our.bowl (slug:spec (required:spec args 'name' 64))])
+      ==
+    :_  ~
+    %+  rap  3
+    :~  'error: this ship already has a group named '  (required:spec args 'name' 64)
+        '; choose a name no group uses. An existing group is not a stand-in for a new one.'
+    ==
   =/  =card:agent:gall  (command args wire action)
   =/  body
     %+  rap  3
