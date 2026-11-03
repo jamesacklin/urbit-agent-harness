@@ -1028,8 +1028,9 @@
   [[%& (list-json:schedule-lib schedules hands ~)] cards state]
 ::
 ++  schedule-add
-  |=  action=$>(%add action:cr)
+  |=  action=action:cr
   ^-  [result=(each json @t) cards=(list card) new=_state]
+  ?>  ?=(%add -.action)
   ::  A repeated creation request returns the original job. Reusing its
   ::  identity for different arguments must not replace that job.
   =/  prior  (~(get by schedules) id.action)
@@ -1092,8 +1093,9 @@
   [[%& (one-json:schedule-lib id.action job hands)] created state]
 ::
 ++  schedule-edit
-  |=  [action=$>(%edit action:cr) job=schedule:cr]
+  |=  [action=action:cr job=schedule:cr]
   ^-  [result=(each json @t) cards=(list card) new=_state]
+  ?>  ?=(%edit -.action)
   ?.  =(revision.action (sham job))
     [[%| 'Schedule changed; list schedules again before editing'] ~ state]
   ?:  (busy:schedule-lib (job-value:schedule-lib job) hands)
@@ -1109,8 +1111,9 @@
   [[%& (one-json:schedule-lib id.action p.parsed hands)] ~ state]
 ::
 ++  schedule-retry
-  |=  [action=$>(%retry action:cr) job=schedule:cr]
+  |=  [action=action:cr job=schedule:cr]
   ^-  [result=(each json @t) cards=(list card) new=_state]
+  ?>  ?=(%retry -.action)
   ?.  ?&  =(last.job `input.action)
           (retryable:schedule-lib (job-value:schedule-lib job) hands)
           (schedule-live job)
@@ -1145,8 +1148,9 @@
   [[%& (list-json:schedule-lib schedules hands ~)] cards state]
 ::
 ++  schedule-delete
-  |=  [action=$>(%delete action:cr) job=schedule:cr]
+  |=  [action=action:cr job=schedule:cr]
   ^-  [result=(each json @t) cards=(list card) new=_state]
+  ?>  ?=(%delete -.action)
   ?:  (busy:schedule-lib (job-value:schedule-lib job) hands)
     [[%| 'Work or delivery is still pending; cancel first and delete after it settles'] ~ state]
   =^  cards  state  (stop-schedule id.action job %cancelled 'Schedule deleted')
@@ -1154,8 +1158,9 @@
   [[%& (list-json:schedule-lib schedules hands ~)] cards state]
 ::
 ++  schedule-clear
-  |=  [action=$>(%clear action:cr) job=schedule:cr]
+  |=  [action=action:cr job=schedule:cr]
   ^-  [result=(each json @t) cards=(list card) new=_state]
+  ?>  ?=(%clear -.action)
   ::  Clearing also requires a settled lifecycle; deleting only requires
   ::  that no execution or delivery is in flight.
   ?.  (clearable:schedule-lib (job-value:schedule-lib job) hands)
@@ -6278,8 +6283,9 @@
   (peer-rpc-invoke src message u.grant tools)
 ::
 ++  peer-rpc-result
-  |=  [src=@p message=$>(%result peer-rpc:h)]
+  |=  [src=@p message=peer-rpc:h]
   ^-  (quip card _state)
+  ?>  ?=(%result -.message)
   =/  pending  (~(get by asks) id.message)
   ?.  &(?=(^ pending) =(src ship.u.pending))  `state
   =/  current  (~(get by sessions) sid.u.pending)
@@ -6293,8 +6299,9 @@
   (finish-peer-client sid.u.pending next-req.u.current call-id.u.pending body)
 ::
 ++  peer-rpc-discover
-  |=  [src=@p message=$>(%tools peer-rpc:h) tools=(list tool-grant:h)]
+  |=  [src=@p message=peer-rpc:h tools=(list tool-grant:h)]
   ^-  (quip card _state)
+  ?>  ?=(%tools -.message)
   ::  Discovery projects the available catalog without admitting input or
   ::  creating a serving conversation.
   =/  attempted
@@ -6324,11 +6331,12 @@
 ::
 ++  peer-rpc-invoke
   |=  $:  src=@p
-          message=$>(%invoke peer-rpc:h)
+          message=peer-rpc:h
           grant=peer-grant:h
           tools=(list tool-grant:h)
       ==
   ^-  (quip card _state)
+  ?>  ?=(%invoke -.message)
   ?.  (fresh:peer-rpc issued.message now.bowl)
     :*  :~  %+  peer-rpc-card
               src
@@ -6378,11 +6386,12 @@
 ::
 ++  peer-rpc-admit
   |=  $:  src=@p
-          message=$>(%invoke peer-rpc:h)
+          message=peer-rpc:h
           tools=(list tool-grant:h)
           call=tool-call:h
       ==
   ^-  (quip card _state)
+  ?>  ?=(%invoke -.message)
   =/  sid=session-id:h  (cat 3 'peer-tool--' (scot %p src))
   ?:  ?|  (~(has by peer-active) sid)
           %+  lien  ~(val by bindings.hands)
