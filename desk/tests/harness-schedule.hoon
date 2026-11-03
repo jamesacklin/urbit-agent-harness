@@ -82,6 +82,18 @@
       (expect-eq !>('/cancel is literal reminder text') !>(prompt.out))
       (expect-eq !>(1) !>(remaining.out))
   ==
+++  test-reminder-destination-defaults-to-source
+  =/  action  action
+  =/  args
+    %-  pairs:enjs:format
+    :~  ['at' %s '2035-03-13T09:00:00+09:00']  ['text' %s 'Visa renewal is due tomorrow']
+    ==
+  =/  out  (create:schedule action(kind %reminder, args args) source ~ ~2026.9.9)
+  ;:  weld
+      (expect-eq !>('room/launch') !>(destination.out))
+      (expect-eq !>(~2035.3.13) !>(next.out))
+      (expect-eq !>('UTC+09:00') !>(timezone.out))
+  ==
 ++  test-schedule-kinds-share-the-authorized-source-and-run-identity
   =/  action  action
   =/  once
@@ -140,7 +152,7 @@
   =/  action  action
   %-  zing
   %+  turn
-    ~['2026-09-08T10:00:00Z' '2026-09-10T10:00:00' '2026-09-31T10:00:00Z' '2028-09-10T10:00:00Z']
+    ~['2026-09-08T10:00:00Z' '2026-09-10T10:00:00' '2026-09-31T10:00:00Z' '2037-09-10T10:00:00Z']
   |=  at=@t
   =/  args  (pairs:enjs:format ~[['at' %s at] ['prompt' %s 'Work']])
   =/  invalid  (mule |.((create:schedule action(args args) source ~ ~2026.9.9)))

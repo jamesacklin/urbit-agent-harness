@@ -18,6 +18,27 @@
           (find-sub:ht 'parallel channels' text)
           (find-sub:ht 'Do not use send_dm or send_channel to answer that conversation' text)
       ==
+++  test-cross-chat-search-guidance
+  =/  text  (en:json:html schema:spec)
+  %-  expect
+  !>  ?&  (find-sub:ht 'searches this and every other DM, group DM and joined channel at once' text)
+          (find-sub:ht 'lcm_search covers only your own sessions' text)
+      ==
+++  test-tlon-tool-replaces-conversation-search
+  =/  both  (en:json:html (tool-defs:ht ~[%tlon %tlon-read]))
+  =/  read  (en:json:html (tool-defs:ht ~[%tlon-read]))
+  %-  expect
+  !>  ?&  !(find-sub:ht '"tlon_search_history"' both)
+          !(find-sub:ht '"tlon_history_page"' both)
+          (find-sub:ht '"tlon_read_history"' both)
+          (find-sub:ht '"tlon_search_history"' read)
+      ==
+++  test-help-topic-aliases
+  %-  expect
+  !>  ?&  =((help:spec 'groups') (help:spec 'channels'))
+          =((help:spec 'contacts') (help:spec 'profile'))
+          =((help:spec 'messages') (help:spec 'history'))
+      ==
 ++  test-identifiers
   %-  expect
   !>  ?&  =([~nec %test] (flag:spec '~nec/test'))

@@ -64,11 +64,13 @@
   ^-  job:c
   ::  Literal reminders keep both their exact text and source destination.
   ?:  =(%reminder kind.job)
-    =/  fields=[at=@t destination=@t text=@t]
+    =/  fields=[at=@t text=@t]
       %.  args
       %-  ot:dejs:format
-      ~[at+so:dejs:format destination+so:dejs:format text+so:dejs:format]
-    ?>  =(destination.fields destination.job)
+      ~[at+so:dejs:format text+so:dejs:format]
+    ?>  ?=(%o -.args)
+    =/  named  (~(get by p.args) 'destination')
+    ?>  |(?=(~ named) =(u.named [%s destination.job]))
     ?>  &((gth (met 3 text.fields) 0) (lte (met 3 text.fields) 4.096))
     =/  time  (parse:reminder at.fields now)
     %*  .  job

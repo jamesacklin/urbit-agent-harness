@@ -3,7 +3,8 @@
 ::  arranged order with the pinned post first, as the app writes it.
 /-  t=harness-tlon, g=tlon-groups-ver, dv=tlon-channels-ver
 /+  spec=harness-tlon-tool, io=harness-tlon-io, message=harness-tlon-message-tool,
-    group-tool=harness-tlon-group-tool, policy=harness-tlon-group-policy
+    group-tool=harness-tlon-group-tool, policy=harness-tlon-group-policy,
+    story=harness-tlon-story, ht=harness-tools
 |_  bowl=bowl:gall
 +$  result  [body=@t effect=(unit card:agent:gall)]
 ::
@@ -82,7 +83,11 @@
   =/  order=(list @da)  (fall order.channel ~)
   =/  rest  (skip order |=(at=@da =(at id)))
   ?:  =('pin_message' action)
-    (accepted action [%channel nest %order `[id rest]] wire)
+    ::  Quote the post pinned, as +receipt in harness-tlon-operations quotes a
+    ::  reaction's: ids of posts sent together differ only in their last digits.
+    =/  pinned  (accepted action [%channel nest %order `[id rest]] wire)
+    =/  text  (story-to-text:story content:+:(channel-post:~(. message bowl) nest id))
+    pinned(body (rap 3 body.pinned '. The pinned post reads: ' (clip:ht text 200) ~))
   ?:  =(rest order)  ['error: that post is not pinned in the channel' ~]
   (accepted action [%channel nest %order `rest] wire)
 ::

@@ -721,6 +721,9 @@ at most 20 entries and returns at most 20 messages in chronological order.
 800 rendered text bytes per message, inspecting at most 64 entries and returning
 at most 20 matches per call. This is bounded local history search, not a complete
 index. An empty page with `has_more: true` is not an exhaustive no-match.
+Where the ship-wide `tlon` tool is granted, these two are left out of the
+catalog: its `history` and `search_history` cover this conversation as well,
+and its `search_history` without `ship` or `channel` covers every other chat.
 
 Both return `messages`, a separate thread `parent`, `next_cursor`, `has_more`,
 `scanned`, `scan_limit`, and `text_limit_bytes`; search also reports the parent's
