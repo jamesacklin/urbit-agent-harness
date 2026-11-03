@@ -10,7 +10,7 @@ agents, and scheduled runs cannot enable these through a configuration flag.
 
 ## Tasks and literal reminders
 
-`schedule_once` takes a future RFC3339 `at` within 365 days, with `Z` or an
+`schedule_once` takes a future RFC3339 `at` within 10 years, with `Z` or an
 explicit UTC offset, and a self-contained `prompt` (1–4,096 UTF-8 bytes).
 It runs inference once at that exact time. Include the necessary brief and
 authorized sources: the isolated agent does not receive the source transcript.
@@ -23,8 +23,9 @@ day-of-month and weekday fields use OR semantics. The next occurrence must be
 within the bounded four-year search horizon. Invalid or impossible expressions
 are rejected. Recurring local time, IANA zones and DST are not supported.
 
-`reminder_add` takes the exact conversation `destination`, literal `text`
-(1–4,096 UTF-8 bytes), and a future RFC3339 `at` within 365 days. An explicit
+`reminder_add` takes literal `text` (1–4,096 UTF-8 bytes) and a future RFC3339
+`at` within 10 years, and optionally the conversation's own `destination`; a
+reminder is delivered only to the conversation that set it. An explicit
 offset or `Z` is required; unknown `-00:00` is rejected. Ask for the intended
 offset rather than guessing. When due, the head admits a literal notification
 and publication without inference or command parsing. `/cancel` in its text

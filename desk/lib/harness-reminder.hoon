@@ -75,6 +75,6 @@
     %+  add  fraction
     ?:  =('-' (part zone-at 1))  (add at offset)
     (sub at offset)
-  ?>  &((gth at now) (lte at (add now ~d365)))
+  ?>  &((gth at now) (lte at (add now ~d3653)))
   [at ?:(=('Z' zone) 'UTC' (cat 3 'UTC' zone))]
 --

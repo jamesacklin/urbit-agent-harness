@@ -511,15 +511,23 @@
           ['prompt' 'Instruction for each run, at most 4096 bytes']
           ['runs' 'Maximum number of runs, decimal integer from 1 to 100']
       ==
-      %^  fun-json
-        'reminder_add'
-        'Schedule one requested literal reminder in this exact conversation, without inference at delivery time. Require an explicit timezone/UTC offset from the user; ask if it is unknown. Reports scheduling, not delivery. List or cancel with cron_list/cron_remove.'
-      :~  :-  'at'
-          'Future RFC3339 timestamp within 365 days, e.g. 2026-09-07T09:00:00-05:00; Z means UTC. No inferred timezone'
-          :-  'destination'
-          'Exact destination address from this conversation instructions; no cross-chat delivery'
-          :-  'text'
-          'Literal reminder text, 1..4096 UTF-8 bytes; delivered without running it as a command or instruction'
+      %-  fun
+      :*  'reminder_add'
+          'Schedule one requested literal reminder in this exact conversation, without inference at delivery time. Require an explicit timezone/UTC offset from the user; ask if it is unknown. Reports scheduling, not delivery. List or cancel with cron_list/cron_remove.'
+          :~  :-  'at'
+              %+  argument
+                'string'
+              'Future RFC3339 timestamp within 10 years, e.g. 2026-09-07T09:00:00-05:00; Z means UTC. No inferred timezone'
+              :-  'text'
+              %+  argument
+                'string'
+              'Literal reminder text, 1..4096 UTF-8 bytes; delivered without running it as a command or instruction'
+              :-  'destination'
+              %+  argument
+                'string'
+              'Optional: this conversation\'s destination address. A reminder is always delivered here; no cross-chat delivery'
+          ==
+          ~['at' 'text']
       ==
       %-  fun
       :*  'schedule_once'
@@ -527,7 +535,7 @@
           :~  :-  'at'
               %+  argument
                 'string'
-              'Future RFC3339 timestamp within 365 days, including Z or an explicit UTC offset'
+              'Future RFC3339 timestamp within 10 years, including Z or an explicit UTC offset'
               :-  'prompt'
               %+  argument
                 'string'

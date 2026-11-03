@@ -41,7 +41,7 @@
   |=  text=@t
   =(~ (mole |.((parse:r text ~2026.9.6))))
 ++  test-horizon-and-past-time-are-rejected
-  =/  cases=(list @t)  ~['2026-09-06T00:00:00Z' '2026-09-05T23:59:59Z' '2027-09-07T00:00:00Z']
+  =/  cases=(list @t)  ~['2026-09-06T00:00:00Z' '2026-09-05T23:59:59Z' '2036-09-07T00:00:00Z']
   %-  expect
   !>
   %+  levy  cases

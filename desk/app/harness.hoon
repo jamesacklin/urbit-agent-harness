@@ -1057,7 +1057,7 @@
   =/  parsed  (mule |.((create:schedule-lib action u.source grants now.bowl)))
   ?.  ?=(%& -.parsed)
     :*  :*  %|
-            'Require an authorized actor and prompt 1..4096 bytes with either a future RFC3339 at timestamp (explicit offset or Z) or a five-field UTC schedule and runs 1..100. Literal reminders require at, exact destination and text.'
+            'Require an authorized actor and prompt 1..4096 bytes with either a future RFC3339 at timestamp (explicit offset or Z) or a five-field UTC schedule and runs 1..100. Literal reminders require at and text, and a destination only if it names this conversation.'
         ==
         ~  state
     ==
