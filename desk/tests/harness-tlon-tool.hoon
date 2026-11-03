@@ -22,7 +22,16 @@
   =/  text  (en:json:html schema:spec)
   %-  expect
   !>  ?&  (find-sub:ht 'searches this and every other DM, group DM and joined channel at once' text)
-          (find-sub:ht 'tlon_search_history covers only this conversation' text)
+          (find-sub:ht 'lcm_search covers only your own sessions' text)
+      ==
+++  test-tlon-tool-replaces-conversation-search
+  =/  both  (en:json:html (tool-defs:ht ~[%tlon %tlon-read]))
+  =/  read  (en:json:html (tool-defs:ht ~[%tlon-read]))
+  %-  expect
+  !>  ?&  !(find-sub:ht '"tlon_search_history"' both)
+          !(find-sub:ht '"tlon_history_page"' both)
+          (find-sub:ht '"tlon_read_history"' both)
+          (find-sub:ht '"tlon_search_history"' read)
       ==
 ++  test-help-topic-aliases
   %-  expect

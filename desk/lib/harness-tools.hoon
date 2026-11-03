@@ -321,8 +321,27 @@
   |=  tools=(list tool-grant:h)
   ^-  json
   =/  base=(list json)  core-defs
-  =/  granted=(list json)  (zing (turn (tool-families tools) family-defs))
+  =/  families  (tool-families tools)
+  =/  granted=(list json)  (zing (turn families family-defs))
+  ::  The ship-wide tlon tool searches and pages this conversation too. Beside
+  ::  it, the conversation's own search looks like the tool for recall and
+  ::  misses every other chat, so only the narrower read stays listed.
+  =?  granted  (lien families |=(family=term =(%tlon family)))
+    %+  skip  granted
+    |=  def=json
+    %+  lien  `(list @t)`~['tlon_search_history' 'tlon_history_page']
+    |=(name=@t =(name (def-name def)))
   [%a (weld base granted)]
+::
+++  def-name
+  |=  def=json
+  ^-  @t
+  ?>  ?=(%o -.def)
+  =/  function  (~(got by p.def) 'function')
+  ?>  ?=(%o -.function)
+  =/  name  (~(got by p.function) 'name')
+  ?>  ?=(%s -.name)
+  p.name
 ::  These tools need no capability grant and always lead the schema list.
 ++  core-defs
   ^-  (list json)
@@ -474,7 +493,7 @@
       ==
       %^  fun-json
         'tlon_search_history'
-        'Search a bounded window in this exact conversation. Literal ASCII-case-insensitive substring matching within the first 800 rendered text bytes per message; not a whole-history index. Inspects at most 64 entries and returns at most 20 matches, plus next_cursor. An empty result with has_more is not an exhaustive no-match. Thread parent is separate with parent_matches. Older reads do not expand reaction authority. To recall something said earlier, here or anywhere else, prefer the tlon tool\'s search_history with only query: it covers this conversation and every other chat at once.'
+        'Search a bounded window in this exact conversation. Literal ASCII-case-insensitive substring matching within the first 800 rendered text bytes per message; not a whole-history index. Inspects at most 64 entries and returns at most 20 matches, plus next_cursor. An empty result with has_more is not an exhaustive no-match. Thread parent is separate with parent_matches. Older reads do not expand reaction authority.'
       :~  ['query' 'Nonblank literal text, at most 128 bytes']
           :-  'cursor'
           'Optional next_cursor from the same search query in this conversation; empty starts newest'
