@@ -53,7 +53,7 @@
       %'groups'
     %+  rap  3
     :~  'list_contacts; list_groups; get_group(group); '
-        'list_channels(group?) lists one group\'s channels, or with no group every channel in every joined group with its group. create_group(name,title,description?,privacy?,owner?). '
+        'list_channels(group?) lists one group\'s channels, or with no group every channel in every joined group with its group. create_group(name,title,description?,privacy?,owner?) makes a group this ship hosts; one made for your owner belongs on their ship, so when an MCP server that acts on your owner\'s account is granted, create it there. '
         'invite_to_group(group,ship); create_invite_link(group) makes a shareable https://invite.tlon.io link: the first call asks %reel for it and a later call returns it; private and secret groups need the host or an admin. Joining through someone else\'s link is not supported here. join_group(group); leave_group(group); create_channel(group,name,title,description?,kind?). Channel kinds in the app: Chat is chat, Gallery is heap, Notebook is notes. Sections arrange a group\'s channels: list_sections(group); create_section(group,title); rename_section(group,section,title); delete_section(group,section) for an empty section other than default; move_channel(group,channel,section) puts a channel last in another section, and with index (0 first) reorders it within its own; order_sections(group,order) takes every section ID once. Arranging needs the group host or an admin. join_channel(channel) and leave_channel(channel) join or leave one chat or gallery channel without leaving the group. '
         'Groups: list_members(group); update_group(group,title?,description?,image?,cover?); update_channel(group,channel,title?,description?,image?,cover?); image and cover are an http(s) URL or a color. '
         'Metadata updates preserve omitted fields and existing channel permissions; at least one edited field is required. '
@@ -189,7 +189,7 @@
       ==
       :*  'owner'
           %-  field
-          'create_group only: explicit requester ship to invite and make a Tlon group admin; does not transfer hosting or Harness ownership'
+          'create_group only: explicit requester ship to invite and make a Tlon group admin; does not transfer hosting or Harness ownership, and this ship still hosts the group'
       ==
       :*  'role'
           %-  field
