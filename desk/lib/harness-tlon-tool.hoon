@@ -2,7 +2,7 @@
 /-  t=harness-tlon
 |%
 ++  sending-guidance
-  'Your normal final reply is automatically delivered to the current DM/channel/thread that prompted you. Do not use send_dm or send_channel to answer that conversation; use them only for separate messages to other DMs or parallel channels.'
+  'Your normal final reply is automatically delivered to the current DM/channel/thread that prompted you. Do not use send_dm or send_channel to answer that conversation; use them only for separate messages to other DMs or parallel channels. Asked to post in a channel, such as a group\'s General channel or "the main chat", from a DM or another channel, that is a separate message: find the channel with list_channels and send it there.'
 ::  The conversation's own search tools sit beside this one in the catalog
 ::  and look like the obvious choice, so name what they miss.
 ++  search-guidance
@@ -176,7 +176,9 @@
       ==
       ['title' (field 'New group/channel display title, 1..128 bytes')]
       ['description' (field 'Optional description, at most 1024 bytes')]
-      ['privacy' (field 'Group privacy: secret (default), private, public')]
+      :-  'privacy'
+      %-  field
+      'Group privacy: secret (default), private, public. Omit it unless the user asked for one; a word like "open" in a title is not a privacy request'
       :*  'kind'
           %-  field
           'Channel kind: chat (default), diary, heap, notes; Notes assigns its own name'
