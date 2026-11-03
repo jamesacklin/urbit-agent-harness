@@ -13,7 +13,7 @@
     section=harness-tlon-section-tool, attachment=harness-tlon-attachment,
     search=harness-tlon-search-tool, invite=harness-tlon-invite-tool,
     bucket=harness-tlon-bucket-tool
-/+  migration=harness-tlon-notes-migration, paths=harness-tlon-paths
+/+  migration=harness-tlon-notes-migration, paths=harness-tlon-paths, ht=harness-tools
 |_  bowl=bowl:gall
 +*  read-path  ~(. paths [our now]:bowl)
 ::
@@ -275,6 +275,14 @@
   ?^  refusal  [(cat 3 'error: ' u.refusal) ~]
   ::  Mutations build one native card; the adapter observes its receipt.
   =/  =card:agent:gall  (mutation args wire sent action)
+  [(receipt args action) `card]
+::
+::  +receipt: a mutation's acknowledgement. Posts sent together differ only
+::  in their last id digits, so a reaction quotes the post it landed on: the
+::  model can see when a copied id named the wrong one.
+++  receipt
+  |=  [args=json action=@t]
+  ^-  @t
   =/  body
     %-  rap
     :-  3
@@ -282,7 +290,9 @@
         action
         '; remote delivery or completion is not confirmed'
     ==
-  [body `card]
+  ?.  =('react' action)  body
+  =/  target  text:(get:~(. message bowl) args)
+  (rap 3 body '. The post reacted to reads: ' (clip:ht target 200) ~)
 ::
 ++  mutation
   |=  [args=json wire=wire sent=@da action=@t]
